@@ -1,0 +1,126 @@
+================================================================================
+NLP GROUP PROJECT: SMS SPAM DETECTION SYSTEM
+HOW TO RUN THE PROJECT (A TO Z GUIDE)
+================================================================================
+
+This guide provides step-by-step instructions to set up the environment, prepare the 
+data, train the machine learning and deep learning models, and test them with custom inputs.
+
+--------------------------------------------------------------------------------
+STEP 1: INSTALL AND SETUP THE ENVIRONMENT
+--------------------------------------------------------------------------------
+You can set up the project environment either using Anaconda/Miniconda (Recommended) 
+or using the standard Python Virtual Environment (venv).
+
+Option A: Using Conda (Anaconda / Miniconda)
+1. Open your terminal (Command Prompt, Anaconda Prompt, or PowerShell).
+2. Create a new environment with Python 3.10:
+   conda create -n spam_env python=3.10 -y
+
+3. Activate the newly created environment:
+   conda activate spam_env
+
+4. Install the required libraries:
+   pip install pandas scikit-learn tensorflow xgboost
+
+---
+
+Option B: Using Standard Python Virtual Environment (venv)
+1. Open your terminal (Command Prompt or PowerShell) and navigate to the project folder.
+2. Create a virtual environment named "venv":
+   python -m venv venv
+
+3. Activate the virtual environment:
+   * On Windows (CMD):
+     venv\Scripts\activate
+   * On Windows (PowerShell):
+     .\venv\Scripts\Activate.ps1
+   * On macOS / Linux:
+     source venv/bin/activate
+
+4. Install the required libraries:
+   pip install pandas scikit-learn tensorflow xgboost
+
+
+--------------------------------------------------------------------------------
+STEP 2: PREPARE AND CLEAN THE DATA
+--------------------------------------------------------------------------------
+Before training, you must download and preprocess the SMS dataset.
+
+1. Run the data preparation script:
+   python 1_prepare_data.py
+
+2. What this script does:
+   - Downloads the raw SMS Spam Collection dataset from the URL.
+   - Cleans the text (converts to lowercase, removes punctuation/special characters).
+   - Maps labels ('ham' -> 0, 'spam' -> 1).
+   - Splits the dataset into Train (70%), Val (15%), and Test (15%) splits.
+   - Saves them inside a new directory called 'data' as:
+     - `data/train.csv`
+     - `data/val.csv`
+     - `data/test.csv`
+
+
+--------------------------------------------------------------------------------
+STEP 3: TRAIN THE MODELS
+--------------------------------------------------------------------------------
+Each group member has distinct models. You can train their models by running their 
+respective scripts.
+
+1. Train Member 1 Models (Logistic Regression & 1D CNN):
+   python 2_member1_train.py
+   (Saves output files in: `models/member1/`)
+
+2. Train Member 2 Models (Random Forest & LSTM):
+   python 3_member2_train.py
+   (Saves output files in: `models/member2/`)
+
+3. Train Member 3 Models (XGBoost & Transformer):
+   python 4_member3_train.py
+   (Saves output files in: `models/member3/`)
+
+Note: Running these scripts will create a `models/` directory if it does not exist, 
+saving tokenizers, vectorizers (.pkl files), and trained neural networks (.keras files) 
+into their respective subfolders.
+
+
+--------------------------------------------------------------------------------
+STEP 4: TEST AND COMPARE THE MODELS (INTERACTIVE INFERENCE)
+--------------------------------------------------------------------------------
+Once the training is complete, you can test any of the models using the interactive 
+testing script.
+
+1. Run the testing script:
+   python 5_test_model.py
+
+2. Select a model from the list by typing the corresponding number (1-6):
+   - 1: Member 1 - Logistic Regression (ML)
+   - 2: Member 1 - 1D CNN (DL)
+   - 3: Member 2 - Random Forest (ML)
+   - 4: Member 2 - LSTM (DL)
+   - 5: Member 3 - XGBoost (ML)
+   - 6: Member 3 - Transformer (DL)
+
+3. Enter any test message when prompted. The model will analyze it and display:
+   - ✅ RESULT: This is a SAFE (Ham) message.
+   - 🚨 RESULT: This is a SPAM message!
+
+4. Type `exit` and press Enter to close the testing tool.
+
+
+--------------------------------------------------------------------------------
+TROUBLESHOOTING & COMMON ISSUES
+--------------------------------------------------------------------------------
+* Error: "ModuleNotFoundError: No module named 'pandas'" or similar
+  - Solution: Ensure you activated the virtual environment (`conda activate spam_env` or 
+    `venv\Scripts\activate`) before running the scripts.
+
+* Error: "Error loading model! Please make sure you have run the training scripts first."
+  - Solution: Run the member training scripts (`2_member1_train.py`, etc.) before 
+    running the testing script `5_test_model.py`.
+
+* PowerShell Activation Policy Error:
+  - If PowerShell blocks you from running `Activate.ps1`, open PowerShell as Administrator and run:
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+    Then try activating again.
+================================================================================

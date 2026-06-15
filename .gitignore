@@ -1,0 +1,28 @@
+# Python virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Data files (since dataset is downloaded and prepared locally)
+data/
+*.csv
+*.xlsx
+
+# Model files (models will be trained and saved locally)
+models/
+*.pkl
+*.keras
+*.h5
+
+# OS generated files
+.DS_Store
+Thumbs.db
