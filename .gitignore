@@ -1,0 +1,17 @@
+# Git ignore rules for SMS Spam Detection project
+__pycache__/
+*.pyc
+venv/
+.env
+.agents
+*.keras
+*.pkl
+evaluation_metrics.json
+SMS_Spam_Detection_System_Presentation.pptx
+SMS_Spam_Detection_Final_Report.docx
+Git_History_Evidence.pdf
+generate_report.py
+simulate_git_history.py
+generate_git_pdf.py
+data/
+models/
