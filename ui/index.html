@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpamGuard AI — Enterprise SMS Spam Detection</title>
+  <meta name="description" content="Enterprise-grade AI analytics platform for SMS Spam Detection using 6 ML & DL models." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ░░ AMBIENT BACKGROUND ░░ -->
+  <div class="ambient-bg" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <canvas id="particleCanvas"></canvas>
+  </div>
+
+  <!-- ░░ SIDEBAR ░░ -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+
+    <div class="brand">
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+          <defs>
+            <linearGradient id="brandGrad" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient>
+          </defs>
+          <path d="M19 2L5 9V19C5 28.4 11.5 37.1 19 39C26.5 37.1 33 28.4 33 19V9L19 2Z" fill="url(#brandGrad)"/>
+          <path d="M13 19l4 4 8-8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <p class="brand-name">SpamGuard AI</p>
+        <p class="brand-sub">Enterprise Analytics</p>
+      </div>
+    </div>
+
+    <div class="sidebar-sep"></div>
+
+    <nav>
+      <p class="nav-section-label">Main</p>
+      <button class="nav-btn active" id="navDetector" onclick="switchTab('Detector')" aria-current="page">
+        <svg class="nav-ico" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.8"/><path d="M17 17l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Spam Detector
+        <span class="nav-bar"></span>
+      </button>
+      <button class="nav-btn" id="navAnalytics" onclick="switchTab('Analytics')">
+        <svg class="nav-ico" viewBox="0 0 20 20" fill="none"><rect x="2" y="12" width="3" height="6" rx="1" fill="currentColor" opacity=".7"/><rect x="8" y="7" width="3" height="11" rx="1" fill="currentColor" opacity=".85"/><rect x="14" y="3" width="3" height="15" rx="1" fill="currentColor"/></svg>
+        Analytics
+        <span class="nav-bar"></span>
+      </button>
+      <button class="nav-btn" id="navAbout" onclick="switchTab('About')">
+        <svg class="nav-ico" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M10 9v5M10 7h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        About
+        <span class="nav-bar"></span>
+      </button>
+    </nav>
+
+    <div class="sidebar-sep"></div>
+
+    <!-- Live model status -->
+    <div class="sidebar-widget" id="modelStatusWidget">
+      <p class="widget-label">Model Status</p>
+      <div class="status-list" id="statusList">
+        <div class="status-row"><span class="status-dot loading"></span><span>Checking…</span></div>
+      </div>
+    </div>
+
+    <div class="sidebar-sep"></div>
+
+    <!-- Dataset overview -->
+    <div class="sidebar-widget">
+      <p class="widget-label">Dataset</p>
+      <div class="ds-pill spam-pill">
+        <span>
+          <svg class="pill-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Spam
+        </span>
+        <strong>13.4%</strong>
+      </div>
+      <div class="ds-pill ham-pill">
+        <span>
+          <svg class="pill-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Ham
+        </span>
+        <strong>86.6%</strong>
+      </div>
+      <div class="ds-bar-track"><div class="ds-bar-ham"></div><div class="ds-bar-spam"></div></div>
+      <p class="widget-note">5,574 total messages</p>
+    </div>
+
+    <div class="sidebar-footer">
+      <p>NLP Group Project · 3 Members · 6 Models</p>
+    </div>
+  </aside>
+
+  <!-- ░░ MOBILE TOP BAR ░░ -->
+  <div class="mobile-bar" role="banner">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="mobile-brand">SpamGuard AI</span>
+    <div class="status-badge-mobile" id="statusBadgeMobile">
+      <span class="pulse"></span> Ready
+    </div>
+  </div>
+
+  <!-- ░░ MAIN CONTENT ░░ -->
+  <main class="main" id="main">
+
+    <!-- ══════════════════════════════════════════
+         TAB 1 — DETECTOR
+    ══════════════════════════════════════════════ -->
+    <section class="tab-pane active" id="tabDetector">
+
+      <div class="page-hdr">
+        <div>
+          <h1 class="page-title">
+            <svg class="title-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Spam Detector
+          </h1>
+          <p class="page-sub">Real-time SMS classification using your trained models. Supports all 6 architectures.</p>
+        </div>
+        <div class="server-status" id="serverStatus">
+          <span class="pulse" id="serverPulse"></span>
+          <span id="serverLabel">Connecting…</span>
+        </div>
+      </div>
+
+      <!-- KPI CARDS -->
+      <div class="kpi-row" id="kpiRow">
+        <div class="kpi-card kpi-primary" id="kpiAccuracy">
+          <div class="kpi-icon">
+            <svg class="kpi-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          </div>
+          <div class="kpi-body">
+            <p class="kpi-label">Best Accuracy</p>
+            <p class="kpi-value" id="kpiAccVal">—</p>
+          </div>
+          <div class="kpi-trend">↑</div>
+        </div>
+        <div class="kpi-card kpi-secondary" id="kpiF1">
+          <div class="kpi-icon">
+            <svg class="kpi-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="kpi-body">
+            <p class="kpi-label">Best F1-Score</p>
+            <p class="kpi-value" id="kpiF1Val">—</p>
+          </div>
+          <div class="kpi-trend">↑</div>
+        </div>
+        <div class="kpi-card kpi-success" id="kpiBestModel">
+          <div class="kpi-icon">
+            <svg class="kpi-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+          </div>
+          <div class="kpi-body">
+            <p class="kpi-label">Top Model</p>
+            <p class="kpi-value" id="kpiModelVal">—</p>
+          </div>
+        </div>
+        <div class="kpi-card kpi-purple" id="kpiDataset">
+          <div class="kpi-icon">
+            <svg class="kpi-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <div class="kpi-body">
+            <p class="kpi-label">Dataset Size</p>
+            <p class="kpi-value">5,574</p>
+          </div>
+          <div class="kpi-sub">SMS messages</div>
+        </div>
+      </div>
+
+      <!-- DETECTOR GRID -->
+      <div class="detector-grid">
+
+        <!-- Message Input -->
+        <div class="glass-card">
+          <p class="card-lbl">
+            <svg viewBox="0 0 18 18" fill="none" width="16" height="16"><path d="M15 2H3a1 1 0 00-1 1v9a1 1 0 001 1h2v3l4-3h6a1 1 0 001-1V3a1 1 0 00-1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            Message Input
+          </p>
+          <div class="textarea-wrap">
+            <textarea id="msgInput" class="msg-ta" rows="7"
+              placeholder="Type or paste an SMS message…&#10;&#10;e.g. Congratulations! You've won a £1,000 prize. Call now to claim your reward!"
+              maxlength="500" spellcheck="false" aria-label="SMS message to classify"></textarea>
+            <div class="ta-footer">
+              <span class="char-count"><span id="charCount">0</span>/500</span>
+              <button class="ghost-btn" onclick="clearInput()" id="clearInputBtn">✕ Clear</button>
+            </div>
+          </div>
+          <div class="samples-section">
+            <p class="samples-lbl">Quick samples</p>
+            <div class="samples-row">
+              <button class="chip chip-spam" id="ss1" onclick="loadSample('WINNER!! You have been selected to receive a £900 prize reward! To claim call 09061701461. Valid 12 hours only.')">
+                <svg class="chip-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Spam #1
+              </button>
+              <button class="chip chip-spam" id="ss2" onclick="loadSample('Urgent! Your mobile number has won a 2000 pound prize. Call 09058094507 from a landline. Claim now. Expires 12h.')">
+                <svg class="chip-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Spam #2
+              </button>
+              <button class="chip chip-ham" id="sh1" onclick="loadSample('Hey, are you coming to the meeting tomorrow? Let me know so I can save you a seat.')">
+                <svg class="chip-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Ham #1
+              </button>
+              <button class="chip chip-ham" id="sh2" onclick="loadSample('Can you pick up some milk on your way home? Thanks a lot!')">
+                <svg class="chip-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Ham #2
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Model Selector + Analyze -->
+        <div class="right-col">
+          <div class="glass-card model-select-card">
+            <p class="card-lbl">
+              <svg viewBox="0 0 18 18" fill="none" width="16" height="16"><rect x="2" y="2" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M5 9l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Select Model
+            </p>
+
+            <div class="model-group-hdr"><span class="type-chip ml">ML</span> Machine Learning</div>
+            <div class="model-grid" id="mlGroup">
+              <label class="model-opt" for="m-lr">
+                <input type="radio" name="model" id="m-lr" value="lr" checked />
+                <div class="mo-inner"><div class="mo-num ml-n">M1</div><div class="mo-text"><strong>Logistic Regression</strong><small>TF-IDF · Linear</small></div><div class="mo-chk">✓</div></div>
+              </label>
+              <label class="model-opt" for="m-rf">
+                <input type="radio" name="model" id="m-rf" value="rf" />
+                <div class="mo-inner"><div class="mo-num ml-n">M2</div><div class="mo-text"><strong>Random Forest</strong><small>TF-IDF · Ensemble</small></div><div class="mo-chk">✓</div></div>
+              </label>
+              <label class="model-opt" for="m-xgb">
+                <input type="radio" name="model" id="m-xgb" value="xgb" />
+                <div class="mo-inner"><div class="mo-num ml-n">M3</div><div class="mo-text"><strong>XGBoost</strong><small>TF-IDF · Boosting</small></div><div class="mo-chk">✓</div></div>
+              </label>
+            </div>
+
+            <div class="model-group-hdr" style="margin-top:1rem"><span class="type-chip dl">DL</span> Deep Learning</div>
+            <div class="model-grid">
+              <label class="model-opt" for="m-cnn">
+                <input type="radio" name="model" id="m-cnn" value="cnn" />
+                <div class="mo-inner"><div class="mo-num dl-n">M1</div><div class="mo-text"><strong>1D CNN</strong><small>Embedding · Conv</small></div><div class="mo-chk">✓</div></div>
+              </label>
+              <label class="model-opt" for="m-lstm">
+                <input type="radio" name="model" id="m-lstm" value="lstm" />
+                <div class="mo-inner"><div class="mo-num dl-n">M2</div><div class="mo-text"><strong>LSTM</strong><small>Embedding · Recurrent</small></div><div class="mo-chk">✓</div></div>
+              </label>
+              <label class="model-opt" for="m-transformer">
+                <input type="radio" name="model" id="m-transformer" value="transformer" />
+                <div class="mo-inner"><div class="mo-num dl-n">M3</div><div class="mo-text"><strong>Transformer</strong><small>Attention · SOTA</small></div><div class="mo-chk">✓</div></div>
+              </label>
+            </div>
+          </div>
+
+          <button class="btn-analyze" id="analyzeBtn" onclick="handleAnalyze()">
+            <span id="analyzeBtnIcon">
+              <svg viewBox="0 0 20 20" fill="none" width="18" height="18"><path d="M10 2L3 6V10C3 14.4 6.1 18.7 10 20C13.9 18.7 17 14.4 17 10V6L10 2Z" fill="rgba(255,255,255,.2)" stroke="white" stroke-width="1.5"/><path d="M7 10l2.5 2.5 4-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span id="analyzeBtnLabel">Analyze Message</span>
+            <div class="btn-shimmer"></div>
+          </button>
+
+          <button class="btn-compare" id="compareBtn" onclick="handleCompareAll()">
+            <svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Compare All 6 Models
+          </button>
+        </div>
+      </div>
+
+      <!-- RESULT PANEL -->
+      <div id="resultPanel" class="result-panel" style="display:none;"></div>
+
+      <!-- EXPLAINABILITY PANEL -->
+      <div id="explainPanel" class="explain-panel" style="display:none;">
+        <div class="glass-card">
+          <p class="card-lbl">
+            <svg viewBox="0 0 18 18" fill="none" width="16" height="16"><path d="M9 1L1 5v5c0 4.9 3.5 9.5 8 11 4.5-1.5 8-6.1 8-11V5L9 1z" stroke="currentColor" stroke-width="1.6"/></svg>
+            AI Explainability — Detected Indicators
+          </p>
+          <p class="explain-desc" id="explainDesc"></p>
+          <div class="indicator-chips" id="indicatorChips"></div>
+          <div class="highlighted-msg" id="highlightedMsg"></div>
+        </div>
+      </div>
+
+      <!-- COMPARE ALL MODELS PANEL -->
+      <div id="comparePanel" class="compare-panel" style="display:none;">
+        <div class="glass-card">
+          <p class="card-lbl">
+            <svg viewBox="0 0 18 18" fill="none" width="16" height="16"><rect x="1" y="1" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M1 7h16M7 1v16" stroke="currentColor" stroke-width="1.6"/></svg>
+            All-Model Comparison Results
+          </p>
+          <div class="compare-table-wrap">
+            <table class="compare-table" id="compareTable">
+              <thead>
+                <tr><th>#</th><th>Model</th><th>Type</th><th>Prediction</th><th>Confidence</th><th>Status</th></tr>
+              </thead>
+              <tbody id="compareBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div id="historySection" style="display:none;">
+        <div class="glass-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <p class="card-lbl" style="margin:0">
+              <svg viewBox="0 0 18 18" fill="none" width="16" height="16"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M9 5v4l2.5 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              Analysis History
+            </p>
+            <button class="ghost-btn danger-ghost" onclick="clearHistory()">Clear All</button>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         TAB 2 — ANALYTICS
+    ══════════════════════════════════════════════ -->
+    <section class="tab-pane" id="tabAnalytics">
+
+      <div class="page-hdr">
+        <div>
+          <h1 class="page-title">
+            <svg class="title-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Analytics Dashboard
+          </h1>
+          <p class="page-sub">Comprehensive model performance metrics, rankings, and visual comparisons.</p>
+        </div>
+      </div>
+
+      <!-- Best Model + Leaderboard row -->
+      <div class="analytics-top-row">
+
+        <!-- Best Model Card -->
+        <div class="glass-card best-model-card" id="bestModelCard">
+          <p class="card-lbl">
+            <svg class="card-lbl-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+            Top Performing Model
+          </p>
+          <div class="bm-content">
+            <div class="bm-crown">
+              <svg class="bm-crown-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/></svg>
+            </div>
+            <div class="bm-body">
+              <h2 class="bm-name" id="bmName">—</h2>
+              <p class="bm-type" id="bmType">—</p>
+            </div>
+          </div>
+          <div class="bm-metrics" id="bmMetrics"></div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="glass-card leaderboard-card">
+          <p class="card-lbl">
+            <svg class="card-lbl-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            Model Leaderboard <small>(by F1-Score)</small>
+          </p>
+          <div class="leaderboard" id="leaderboard"></div>
+        </div>
+
+      </div>
+
+      <!-- Full Ranking Table -->
+      <div class="glass-card" style="margin-bottom:24px;">
+        <p class="card-lbl">
+          <svg viewBox="0 0 18 18" fill="none" width="16" height="16"><rect x="1" y="1" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M1 7h16M1 12h16M6 1v16" stroke="currentColor" stroke-width="1.6"/></svg>
+          Full Model Ranking
+        </p>
+        <div class="rank-table-wrap">
+          <table class="rank-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Model</th>
+                <th>Type</th>
+                <th>Member</th>
+                <th>Accuracy</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>F1-Score</th>
+              </tr>
+            </thead>
+            <tbody id="rankingTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="section-hdr">
+        <h2 class="section-title">
+          <svg class="section-title-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          Performance Charts
+        </h2>
+        <p class="section-sub">Visual comparison of all 6 models across key metrics.</p>
+      </div>
+      <div class="charts-grid">
+        <div class="glass-card chart-card">
+          <p class="chart-title">Accuracy Comparison (%)</p>
+          <div class="chart-wrap"><canvas id="chartAccuracy"></canvas></div>
+        </div>
+        <div class="glass-card chart-card">
+          <p class="chart-title">F1-Score Comparison (%)</p>
+          <div class="chart-wrap"><canvas id="chartF1"></canvas></div>
+        </div>
+        <div class="glass-card chart-card">
+          <p class="chart-title">Precision Comparison (%)</p>
+          <div class="chart-wrap"><canvas id="chartPrecision"></canvas></div>
+        </div>
+        <div class="glass-card chart-card">
+          <p class="chart-title">Recall Comparison (%)</p>
+          <div class="chart-wrap"><canvas id="chartRecall"></canvas></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         TAB 3 — ABOUT
+    ══════════════════════════════════════════════ -->
+    <section class="tab-pane" id="tabAbout">
+
+      <div class="page-hdr">
+        <div>
+          <h1 class="page-title">
+            <svg class="title-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            About the Project
+          </h1>
+          <p class="page-sub">NLP Group Project — SMS Spam Detection using ML & Deep Learning pipelines.</p>
+        </div>
+      </div>
+
+      <div class="about-grid">
+
+        <div class="glass-card about-hero">
+          <div class="about-shield">
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+              <defs><linearGradient id="sg3" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+              <path d="M32 4L8 16V32C8 50.8 19.6 63.2 32 67C44.4 63.2 56 50.8 56 32V16L32 4Z" fill="url(#sg3)"/>
+              <path d="M22 32l7 7 14-14" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="about-text">
+            <h2>SMS Spam Detection System</h2>
+            <p>A multi-model NLP platform that classifies SMS messages as spam or ham using 6 trained models — combining classical machine learning and modern deep learning architectures.</p>
+          </div>
+          <div class="about-stats">
+            <div class="astat"><span>5,574</span><small>Messages</small></div>
+            <div class="astat"><span>6</span><small>Models</small></div>
+            <div class="astat"><span>3</span><small>Members</small></div>
+            <div class="astat"><span>2</span><small>Classes</small></div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <p class="card-lbl">
+            <svg class="card-lbl-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Implementation Workflow
+          </p>
+          <div class="workflow">
+            <div class="wf-step"><div class="wf-n">01</div><div><h4>Prepare Data</h4><p>Run <code>1_prepare_data.py</code> — download, clean, encode, split dataset.</p></div></div>
+            <div class="wf-sep"></div>
+            <div class="wf-step"><div class="wf-n">02</div><div><h4>Train Models</h4><p>Run <code>2_member1_train.py</code>, <code>3_member2_train.py</code>, <code>4_member3_train.py</code>.</p></div></div>
+            <div class="wf-sep"></div>
+            <div class="wf-step"><div class="wf-n">03</div><div><h4>Start API</h4><p>Run <code>python api.py</code> — loads all models and starts the Flask server.</p></div></div>
+            <div class="wf-sep"></div>
+            <div class="wf-step"><div class="wf-n">04</div><div><h4>Open UI</h4><p>Visit <code>http://localhost:5000</code> to access the full analytics platform.</p></div></div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <p class="card-lbl">
+            <svg class="card-lbl-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            Dataset Details
+          </p>
+          <table class="info-table">
+            <tr><td>Name</td><td>SMS Spam Collection</td></tr>
+            <tr><td>Total</td><td>5,574 messages</td></tr>
+            <tr><td>Spam</td><td>747 (13.4%)</td></tr>
+            <tr><td>Ham</td><td>4,827 (86.6%)</td></tr>
+            <tr><td>Train</td><td>~70%</td></tr>
+            <tr><td>Validation</td><td>~15%</td></tr>
+            <tr><td>Test</td><td>15%</td></tr>
+            <tr><td>Source</td><td>UCI ML Repository</td></tr>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+  </main><!-- /main -->
+
+  <script src="app.js"></script>
+</body>
+</html>
