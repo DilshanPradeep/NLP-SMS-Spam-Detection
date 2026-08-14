@@ -1,0 +1,197 @@
+================================================================================
+NLP GROUP PROJECT: SMS SPAM DETECTION SYSTEM
+FULL DOCUMENTATION
+================================================================================
+
+1. PROJECT INTRODUCTION
+-----------------------
+This project aims to build a robust and highly accurate text classification system
+capable of identifying and filtering spam messages from short message services (SMS).
+With the rapid increase in mobile communications, unsolicited spam messages (commercial
+advertisements, phishing attempts, financial scams, etc.) have become a significant 
+security threat and inconvenience.
+
+To address this, we leverage Natural Language Processing (NLP) techniques, Machine
+Learning (ML), and Deep Learning (DL) models to automatically classify incoming SMS
+messages as either:
+* "Ham" (0) - Legitimate, safe, and normal personal/business communications.
+* "Spam" (1) - Unsolicited, malicious, or commercial messages.
+
+The system utilizes preprocessed textual data, extracts features, trains multiple ML and 
+DL architectures, and evaluates them to select the most optimal models for deployment.
+
+
+2. DATASET DETAILS & ACCESSIBILITY
+-----------------------------------
+* Dataset Name: SMS Spam Collection Dataset
+* Primary Download Link: 
+  https://raw.githubusercontent.com/justmarkham/pycon-2016-tutorial/master/data/sms.tsv
+  (This is a clean, tab-separated values version of the dataset originally published on the
+  UCI Machine Learning Repository: https://archive.ics.uci.edu/ml/datasets/sms+spam+collection)
+
+* Size and Format:
+  - The dataset contains 5,574 text messages written in English.
+  - Columns:
+    1. label: The classification label ('ham' or 'spam').
+    2. text: The raw text of the SMS message.
+
+* Data Preparation and Partitioning:
+  - Text Cleaning: Text is converted to lowercase, and non-alphanumeric characters 
+    (special characters, punctuation) are removed to normalize inputs.
+  - Target Encoding: Labels are mapped to binary integers: 'ham' -> 0, 'spam' -> 1.
+  - Data Splitting Strategy:
+    - Training Set: ~70% (used to train the parameters of the models)
+    - Validation Set: ~15% (used to tune hyperparameters and monitor DL epochs)
+    - Testing Set: 15% (used for final evaluation and comparison)
+
+
+3. SUITABILITY OF THE DATASET FOR THE PROJECT
+---------------------------------------------
+The SMS Spam Collection Dataset is highly suited for this project for the following reasons:
+
+1. Realistic SMS Text Formatting:
+   The dataset captures real-world text messaging behaviors. It contains typical SMS 
+   characteristics like abbreviations ("u", "r", "txt", "pls"), slang, non-standard spelling, 
+   emojis, and punctuation patterns (e.g., consecutive exclamation marks). This ensures 
+   the trained models learn features that are actually present in real SMS data rather 
+   than standard formal English.
+
+2. Distinct Text Length Profiles:
+   Typically, spam messages are longer, contain more call-to-actions, phone numbers, website 
+   links, and uppercase words, whereas ham messages are shorter, informal, and conversational. 
+   Our models can easily learn these structural patterns.
+
+3. Clear Binary Classification Target:
+   The dataset has distinct, clear ground-truth labels ("ham" vs. "spam"), making it 
+   an ideal candidate for testing binary classifiers.
+
+4. Imbalanced Class Distribution:
+   Out of the 5,574 messages, approximately 86.6% are ham and 13.4% are spam. This imbalance 
+   matches real-world scenarios where spam is less frequent but critical to catch, allowing us 
+   to evaluate models on how well they handle imbalanced data using appropriate metrics.
+
+
+4. INDIVIDUAL MEMBER IMPLEMENTATIONS (ML & DL MODELS)
+------------------------------------------------------
+The project is divided among three group members, with each member developing one Machine 
+Learning (ML) model and one Deep Learning (DL) model.
+
+================================================================================
+MEMBER 1:
+================================================================================
+* Machine Learning (ML) Model: Logistic Regression
+  - Text Representation: TF-IDF Vectorizer (max_features=3000)
+  - Details & Rationale: 
+    TF-IDF (Term Frequency-Inverse Document Frequency) measures the relevance of words 
+    in a document relative to the whole corpus. Words like "free", "urgent", "claim", 
+    and "winner" will have high TF-IDF weights in spam messages. Logistic Regression 
+    is a linear classification model that learns weights for these features. It is 
+    extremely fast to train, acts as a solid baseline, and is highly interpretable.
+
+* Deep Learning (DL) Model: 1D CNN (1D Convolutional Neural Network)
+  - Text Representation: Word Tokenizer (vocab_size=5000, maxlen=50) -> Dense Embedding
+  - Network Architecture: 
+    Embedding Layer (32 dimensions) -> Conv1D Layer (64 filters, kernel size 5, ReLU) -> 
+    Global Max Pooling -> Dense Output Layer (1 unit, Sigmoid activation)
+  - Details & Rationale: 
+    While CNNs are widely known for image processing, 1D CNNs are highly effective for 
+    text classification. They act as n-gram detectors, scanning the sentence for key phrase 
+    patterns (like "win free cash") regardless of where they appear in the message. Global 
+    Max Pooling then extracts the strongest feature signals for classification.
+
+================================================================================
+MEMBER 2:
+================================================================================
+* Machine Learning (ML) Model: Random Forest Classifier
+  - Text Representation: TF-IDF Vectorizer (max_features=3000)
+  - Details & Rationale: 
+    Random Forest is an ensemble learning method that constructs a multitude of decision 
+    trees during training. It outputs the mode of the classes of the individual trees. 
+    It reduces overfitting compared to individual decision trees, handles non-linear 
+    relationships, and works well with sparse TF-IDF vectors.
+
+* Deep Learning (DL) Model: LSTM (Long Short-Term Memory) Network
+  - Text Representation: Word Tokenizer (vocab_size=5000, maxlen=50) -> Dense Embedding
+  - Network Architecture: 
+    Embedding Layer (32 dimensions) -> LSTM Layer (32 hidden units) -> Dense Output 
+    Layer (1 unit, Sigmoid activation)
+  - Details & Rationale: 
+    LSTM is a type of Recurrent Neural Network (RNN) designed to process sequences. Unlike 
+    CNNs that detect local patterns, LSTM models sequential dependencies over time. It can 
+    remember information from previous words in a sentence and relate them to later words, 
+    making it ideal for capturing context and grammatical structure in text.
+
+================================================================================
+MEMBER 3:
+================================================================================
+* Machine Learning (ML) Model: XGBoost Classifier (Extreme Gradient Boosting)
+  - Text Representation: TF-IDF Vectorizer (max_features=3000)
+  - Details & Rationale: 
+    XGBoost is an optimized gradient boosting algorithm designed to be highly efficient, 
+    flexible, and portable. It builds trees sequentially, with each tree correcting the 
+    errors of the previous one. It includes L1 and L2 regularization to control overfitting 
+    and usually achieves higher predictive performance than standard Random Forests.
+
+* Deep Learning (DL) Model: Custom Transformer Network
+  - Text Representation: Word Tokenizer (vocab_size=5000, maxlen=50) -> Dense Embedding
+  - Network Architecture: 
+    Input Layer -> Embedding Layer + Positional Encoding -> Multi-Head Self-Attention 
+    (2 heads, key_dim=32) -> Residual Connection & Layer Normalization -> Feed-Forward 
+    Network -> Residual Connection & Layer Normalization -> Global Average Pooling 1D -> 
+    Dense Output Layer (1 unit, Sigmoid activation)
+  - Details & Rationale: 
+    The Transformer architecture is the foundation of modern state-of-the-art NLP models 
+    (like BERT and GPT). Unlike LSTM, it processes all words simultaneously (in parallel), 
+    using Positional Encodings to retain sequence order. The Self-Attention mechanism 
+    allows the model to dynamically focus on relevant parts of the text regardless of their 
+    distance, capturing complex relationship contexts.
+
+
+5. EVALUATION METRICS TO SELECT THE BEST MODEL
+----------------------------------------------
+To select the best ML and DL models for spam detection, we rely on the following evaluation 
+metrics computed on the test dataset:
+
+1. Accuracy:
+   - Formula: (True Positives + True Negatives) / Total Predictions
+   - Usefulness: Gives a general sense of how many classifications are correct. 
+   - Note: Since the dataset is highly imbalanced (mostly Ham), high accuracy alone 
+     can be misleading (e.g., a naive model predicting all as Ham would get ~87% accuracy). 
+     Therefore, accuracy is not the sole selector.
+
+2. Precision:
+   - Formula: True Positives / (True Positives + False Positives)
+   - Usefulness: Measures out of all predicted Spam messages, how many were actually Spam. 
+   - CRITICAL IMPORTANCE: In SMS Spam classification, Precision is extremely critical. A 
+     False Positive means a legitimate/safe message (Ham) is mistakenly classified as Spam 
+     and blocked. If an important message (like a bank notification or urgent text) is 
+     blocked, it creates a severe user experience issue. Thus, we want a model with high Precision.
+
+3. Recall (Sensitivity):
+   - Formula: True Positives / (True Positives + False Negatives)
+   - Usefulness: Measures out of all actual Spam messages, how many did the model catch. 
+   - Note: A high recall ensures that very few spam messages bypass the filter (low False 
+     Negatives).
+
+4. F1-Score:
+   - Formula: 2 * (Precision * Recall) / (Precision + Recall)
+   - Usefulness: The harmonic mean of Precision and Recall. Since it balances both 
+     metrics, the F1-Score is the primary indicator used to compare the performance 
+     of models on this imbalanced dataset.
+
+5. Confusion Matrix:
+   - A tabular visualization showing True Positives (correctly flagged spam), True Negatives 
+     (correctly flagged ham), False Positives (legitimate messages flagged as spam), and 
+     False Negatives (spam messages missed). We inspect this matrix to compare the absolute 
+     error profiles of the top-performing models.
+
+
+6. SUMMARY OF IMPLEMENTATION WORKFLOW
+-------------------------------------
+* Step 1: Execute `1_prepare_data.py` to download the raw dataset, clean the texts, convert labels, 
+  and export the split files into the `data/` folder.
+* Step 2: Run member training scripts (`2_member1_train.py`, `3_member2_train.py`, `4_member3_train.py`). 
+  These scripts save trained tokenizers, vectorizers, and serialized model files to the `models/` directory.
+* Step 3: Run `5_test_model.py` to load any of the 6 models interactively and test their prediction 
+  performance on arbitrary user inputs.
+================================================================================
