@@ -29,20 +29,20 @@ A web-based dashboard allows users to enter an SMS message, select a model, and 
 
 ## ✨ Key Features
 
-* 🔍 SMS Spam / Ham classification
-* 🤖 Six different ML & DL models
-* 🧠 NLP-based text preprocessing
-* 📚 TF-IDF feature extraction
-* 🔤 Tokenization and sequence padding
-* 📊 Accuracy, Precision, Recall and F1-Score evaluation
-* 📈 Confusion matrix generation
-* ⚖️ Model comparison
-* 🌐 Interactive web dashboard
-* 🔌 Flask REST API
-* 🎯 Prediction confidence scores
-* 🔄 Compare predictions from multiple models
-* ❤️ API health monitoring
-* 📱 Responsive web interface
+* SMS Spam / Ham classification
+* Six different ML & DL models
+* NLP-based text preprocessing
+* TF-IDF feature extraction
+* Tokenization and sequence padding
+* Accuracy, Precision, Recall and F1-Score evaluation
+* Confusion matrix generation
+* Model comparison
+* Interactive web dashboard
+* Flask REST API
+* Prediction confidence scores
+* Compare predictions from multiple models
+* API health monitoring
+* Responsive web interface
 
 ---
 
