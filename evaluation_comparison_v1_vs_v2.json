@@ -1,0 +1,66 @@
+{
+  "xgb_v1": {
+    "name": "XGBoost V1 (Baseline)",
+    "family": "XGBoost",
+    "version": "V1",
+    "type": "ML",
+    "accuracy": 97.37,
+    "precision": 94.74,
+    "recall": 84.11,
+    "f1": 89.11,
+    "cm": {
+      "TN": 724,
+      "FP": 5,
+      "FN": 17,
+      "TP": 90
+    }
+  },
+  "xgb_v2": {
+    "name": "XGBoost V2 (Enhanced)",
+    "family": "XGBoost",
+    "version": "V2",
+    "type": "ML",
+    "accuracy": 98.56,
+    "precision": 98.97,
+    "recall": 89.72,
+    "f1": 94.12,
+    "cm": {
+      "TN": 728,
+      "FP": 1,
+      "FN": 11,
+      "TP": 96
+    }
+  },
+  "tf_v1": {
+    "name": "Transformer V1 (Baseline)",
+    "family": "Transformer",
+    "version": "V1",
+    "type": "DL",
+    "accuracy": 98.68,
+    "precision": 97.06,
+    "recall": 92.52,
+    "f1": 94.74,
+    "cm": {
+      "TN": 726,
+      "FP": 3,
+      "FN": 8,
+      "TP": 99
+    }
+  },
+  "tf_v2": {
+    "name": "Transformer V2 (Corrected)",
+    "family": "Transformer",
+    "version": "V2",
+    "type": "DL",
+    "accuracy": 98.33,
+    "precision": 92.66,
+    "recall": 94.39,
+    "f1": 93.52,
+    "cm": {
+      "TN": 721,
+      "FP": 8,
+      "FN": 6,
+      "TP": 101
+    }
+  }
+}
