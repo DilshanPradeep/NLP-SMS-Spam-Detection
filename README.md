@@ -105,7 +105,6 @@ A Long Short-Term Memory neural network designed to capture sequential dependenc
 ### 5️⃣ XGBoost
 
 An optimized gradient boosting classifier used to identify complex relationships within TF-IDF text features.
-
 ---
 
 ### 6️⃣ Custom Transformer
