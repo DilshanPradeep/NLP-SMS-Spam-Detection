@@ -2,10 +2,13 @@ import os
 import time
 import pickle
 import logging
+import threading
+from collections import deque
 from contextlib import asynccontextmanager
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException, Request, Response, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from utils.preprocessor import preprocess_sms
@@ -36,6 +39,67 @@ logging.basicConfig(
 )
 logger = logging.getLogger("sms_spam_api")
 
+class MetricsTracker:
+    def __init__(self, max_latency_samples: int = 500):
+        self._lock = threading.Lock()
+        self.start_time: float = time.time()
+        self.total_requests: int = 0
+        self.successful_requests: int = 0
+        self.failed_requests: int = 0
+        self.total_batch_requests: int = 0
+        self.failed_batch_requests: int = 0
+        self._latencies: deque = deque(maxlen=max_latency_samples)
+        self.last_request_timestamp: Optional[float] = None
+
+    def record_prediction(self, latency_ms: float = 0.0, success: bool = True) -> None:
+        try:
+            with self._lock:
+                self.total_requests += 1
+                self.last_request_timestamp = time.time()
+                if success:
+                    self.successful_requests += 1
+                    self._latencies.append(latency_ms)
+                else:
+                    self.failed_requests += 1
+        except Exception:
+            pass
+
+    def record_batch(self, success: bool = True) -> None:
+        try:
+            with self._lock:
+                self.total_batch_requests += 1
+                if not success:
+                    self.failed_batch_requests += 1
+        except Exception:
+            pass
+
+    def get_summary(self) -> dict:
+        try:
+            with self._lock:
+                avg_lat = round(sum(self._latencies) / len(self._latencies), 3) if self._latencies else 0.0
+                return {
+                    "uptime_seconds": round(time.time() - self.start_time, 2),
+                    "total_requests": self.total_requests,
+                    "successful_requests": self.successful_requests,
+                    "failed_requests": self.failed_requests,
+                    "total_batch_requests": self.total_batch_requests,
+                    "failed_batch_requests": self.failed_batch_requests,
+                    "average_latency_ms": avg_lat,
+                    "last_request_timestamp": self.last_request_timestamp,
+                }
+        except Exception:
+            return {
+                "uptime_seconds": 0.0,
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "total_batch_requests": 0,
+                "failed_batch_requests": 0,
+                "average_latency_ms": 0.0,
+                "last_request_timestamp": None,
+            }
+
+metrics_tracker = MetricsTracker()
 ml_models = {}
 
 @asynccontextmanager
@@ -44,6 +108,7 @@ async def lifespan(app: FastAPI):
     vectorizer_path = config.get_vectorizer_path()
     model_path = config.get_model_path()
 
+    logger.info("Loading model artifacts from configured directory...")
     if not os.path.exists(vectorizer_path) or not os.path.exists(model_path):
         logger.error("Required model artifacts missing in configured directory.")
         ml_models["vectorizer"] = None
@@ -70,6 +135,24 @@ app = FastAPI(
     description="Real-Time SMS Spam Detection API powered by XGBoost V2",
     version=config.API_VERSION,
     lifespan=lifespan
+)
+
+ALLOWED_ORIGINS = [
+    "http://127.0.0.1",
+    "http://localhost",
+    "http://127.0.0.1:5000",
+    "http://localhost:5000",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "null",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
 )
 
 @app.exception_handler(Exception)
@@ -136,6 +219,11 @@ class HealthResponse(BaseModel):
     vectorizer_loaded: bool
     model_name: str
     version: str
+    uptime_seconds: float
+    total_requests: int
+    successful_requests: int
+    failed_requests: int
+    average_latency_ms: float
 
 @app.get("/", response_model=RootResponse)
 def read_root():
@@ -151,6 +239,7 @@ def health_check(response: Response):
     is_model_loaded = ml_models.get("model") is not None
     is_vec_loaded = ml_models.get("vectorizer") is not None
     is_healthy = is_model_loaded and is_vec_loaded
+    summary = metrics_tracker.get_summary()
 
     if not is_healthy:
         logger.warning("Health check reporting degraded state: models unavailable.")
@@ -160,7 +249,12 @@ def health_check(response: Response):
             model_loaded=is_model_loaded,
             vectorizer_loaded=is_vec_loaded,
             model_name=config.MODEL_NAME,
-            version=config.API_VERSION
+            version=config.API_VERSION,
+            uptime_seconds=summary["uptime_seconds"],
+            total_requests=summary["total_requests"],
+            successful_requests=summary["successful_requests"],
+            failed_requests=summary["failed_requests"],
+            average_latency_ms=summary["average_latency_ms"]
         )
 
     return HealthResponse(
@@ -168,13 +262,19 @@ def health_check(response: Response):
         model_loaded=True,
         vectorizer_loaded=True,
         model_name=config.MODEL_NAME,
-        version=config.API_VERSION
+        version=config.API_VERSION,
+        uptime_seconds=summary["uptime_seconds"],
+        total_requests=summary["total_requests"],
+        successful_requests=summary["successful_requests"],
+        failed_requests=summary["failed_requests"],
+        average_latency_ms=summary["average_latency_ms"]
     )
 
 @app.post("/api/v1/predict", response_model=SMSPredictResponse)
 def predict_sms(payload: SMSPredictRequest):
     if ml_models.get("model") is None or ml_models.get("vectorizer") is None:
         logger.error("Prediction attempted while models are unavailable in memory.")
+        metrics_tracker.record_prediction(latency_ms=0.0, success=False)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Model service is currently unavailable."
@@ -195,7 +295,8 @@ def predict_sms(payload: SMSPredictRequest):
         pred = int(ml_models["model"].predict(vec)[0])
         probabilities = ml_models["model"].predict_proba(vec)[0]
     except Exception as e:
-        logger.error("Unexpected prediction failure: %s", type(e).__name__)
+        logger.error("Unexpected prediction failure: exception=%s", type(e).__name__)
+        metrics_tracker.record_prediction(latency_ms=0.0, success=False)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Prediction failed due to an internal processing error."
@@ -208,6 +309,7 @@ def predict_sms(payload: SMSPredictRequest):
 
     elapsed_ms = (time.perf_counter() - start_time) * 1000.0
     logger.info("Prediction completed in %.2f ms (prediction=%d)", elapsed_ms, pred)
+    metrics_tracker.record_prediction(latency_ms=elapsed_ms, success=True)
 
     return SMSPredictResponse(
         original_text=raw_text,
@@ -225,6 +327,7 @@ def predict_sms(payload: SMSPredictRequest):
 def predict_batch(payload: SMSBatchRequest):
     if ml_models.get("model") is None or ml_models.get("vectorizer") is None:
         logger.error("Batch prediction attempted while models are unavailable in memory.")
+        metrics_tracker.record_batch(success=False)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Model service is currently unavailable."
@@ -260,7 +363,8 @@ def predict_batch(payload: SMSBatchRequest):
                 pred = int(ml_models["model"].predict(vec)[0])
                 probabilities = ml_models["model"].predict_proba(vec)[0]
             except Exception as e:
-                logger.error("Unexpected failure during batch item %d: %s", idx, type(e).__name__)
+                logger.error("Unexpected failure during batch item %d: exception=%s", idx, type(e).__name__)
+                metrics_tracker.record_batch(success=False)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Batch prediction failed due to an internal processing error."
@@ -293,6 +397,7 @@ def predict_batch(payload: SMSBatchRequest):
 
     total_elapsed_ms = (time.perf_counter() - start_time) * 1000.0
     logger.info("Batch prediction of %d messages completed in %.2f ms", len(payload.messages), total_elapsed_ms)
+    metrics_tracker.record_batch(success=True)
 
     return SMSBatchResponse(
         total_messages=len(payload.messages),

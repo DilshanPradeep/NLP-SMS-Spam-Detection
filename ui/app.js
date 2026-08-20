@@ -14,6 +14,7 @@ const state = {
 
 // ── API CONFIG ──────────────────────────────────────────────────
 const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:5000' : '';
+const FASTAPI_BASE = 'http://127.0.0.1:8000';
 
 // Charts storage
 let charts = {};
@@ -52,13 +53,12 @@ async function checkServerStatus() {
   const statusList = document.getElementById('statusList');
 
   try {
-    const res = await fetch(`${API_BASE}/health`);
+    const res = await fetch(`${FASTAPI_BASE}/health`);
     if (!res.ok) throw new Error('Offline');
     const data = await res.json();
     
-    // Server is online
     serverPulse.className = 'pulse';
-    serverLabel.textContent = 'Connected';
+    serverLabel.textContent = 'FastAPI Connected';
     serverStatus.style.background = 'rgba(16,185,129,0.15)';
     serverStatus.style.borderColor = 'rgba(16,185,129,0.3)';
     serverStatus.style.color = '#10b981';
@@ -68,30 +68,29 @@ async function checkServerStatus() {
       statusBadgeMobile.innerHTML = '<span class="pulse"></span> Ready';
     }
 
-    // Update model status widget in sidebar
     if (statusList) {
-      const allModelKeys = ['lr', 'rf', 'xgb', 'cnn', 'lstm', 'transformer'];
-      statusList.innerHTML = allModelKeys.map(key => {
-        const loaded = data.loaded_models.includes(key);
-        const name = {
-          'lr': 'Logistic Reg.',
-          'rf': 'Random Forest',
-          'xgb': 'XGBoost',
-          'cnn': '1D CNN',
-          'lstm': 'LSTM',
-          'transformer': 'Transformer'
-        }[key];
-        return `
-          <div class="status-row">
-            <span class="status-dot ${loaded ? 'online' : 'offline'}"></span>
-            <span>${name}</span>
-            <small style="margin-left:auto; opacity:0.6;">${loaded ? 'Ready' : 'Missing'}</small>
-          </div>
-        `;
-      }).join('');
+      statusList.innerHTML = `
+        <div class="status-row">
+          <span class="status-dot online"></span>
+          <span>XGBoost V2</span>
+          <small style="margin-left:auto; opacity:0.6;">Ready</small>
+        </div>
+      `;
     }
   } catch (err) {
-    // Server is offline
+    try {
+      const resFlask = await fetch(`${API_BASE}/health`);
+      if (resFlask.ok) {
+        const flaskData = await resFlask.json();
+        serverPulse.className = 'pulse';
+        serverLabel.textContent = 'Flask Connected';
+        serverStatus.style.background = 'rgba(16,185,129,0.15)';
+        serverStatus.style.borderColor = 'rgba(16,185,129,0.3)';
+        serverStatus.style.color = '#10b981';
+        return;
+      }
+    } catch (e) {}
+
     serverPulse.className = 'pulse offline';
     serverLabel.textContent = 'Server Offline';
     serverStatus.style.background = 'rgba(239,68,68,0.15)';
@@ -385,12 +384,11 @@ async function handleAnalyze() {
     return;
   }
 
-  if (message.length < 3) {
-    showError('Message is too short. Please enter at least 3 characters.');
+  if (message.length < 1) {
+    showError('Please enter a valid SMS message.');
     return;
   }
 
-  const modelKey = getSelectedModel();
   state.analyzing = true;
   setLoadingState(true);
 
@@ -401,31 +399,33 @@ async function handleAnalyze() {
   if (explainPanel) explainPanel.style.display = 'none';
 
   try {
-    const res = await fetch(`${API_BASE}/predict`, {
+    const res = await fetch(`${FASTAPI_BASE}/api/v1/predict`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: message, model: modelKey })
+      body: JSON.stringify({ text: message })
     });
 
     if (!res.ok) {
-      let errMsg = 'Analysis failed';
-      try {
-        const errData = await res.json();
-        errMsg = errData.error || errMsg;
-      } catch (e) {
-        errMsg = `Server error (${res.status})`;
+      if (res.status === 422) {
+        throw new Error('Please enter a valid SMS message.');
+      } else if (res.status === 503) {
+        throw new Error('Prediction service is currently unavailable. Please try again.');
+      } else if (res.status === 500) {
+        throw new Error('Prediction failed due to an internal server error. Please try again.');
+      } else {
+        throw new Error(`Service request failed (${res.status}).`);
       }
-      throw new Error(errMsg);
     }
-
 
     const data = await res.json();
     const formattedResult = {
-      isSpam: data.prediction === 1,
-      confidence: data.confidence,
-      modelName: data.model_name,
-      modelKey: data.model_key,
-      modelType: data.model_type,
+      isSpam: data.prediction === 1 || data.label === 'SPAM',
+      confidence: typeof data.confidence === 'number' ? data.confidence : 0,
+      modelName: data.model || 'XGBoost V2',
+      modelKey: 'xgb_v2',
+      modelType: 'ML',
+      processingTimeMs: data.processing_time_ms,
+      cleanedText: data.cleaned_text
     };
 
     showResult(formattedResult, message);
@@ -433,7 +433,11 @@ async function handleAnalyze() {
     updateExplainability(message, formattedResult.isSpam);
 
   } catch (err) {
-    showError(err.message || 'Analysis failed. Make sure the server is running and models are trained.');
+    if (err.name === 'TypeError' || (err.message && err.message.includes('fetch'))) {
+      showError('Cannot connect to the prediction service. Please make sure the FastAPI server is running.');
+    } else {
+      showError(err.message || 'Cannot connect to the prediction service. Please make sure the FastAPI server is running.');
+    }
   } finally {
     state.analyzing = false;
     setLoadingState(false);
@@ -549,7 +553,7 @@ function setLoadingState(loading) {
 
 // ── SHOW RESULT ────────────────────────────────────────────────
 function showResult(result, message) {
-  const { isSpam, confidence, modelName, modelType } = result;
+  const { isSpam, confidence, modelName, modelType, processingTimeMs } = result;
 
   const typeLabel  = isSpam ? 'SPAM' : 'HAM';
   const typeClass  = isSpam ? 'spam-result' : 'ham-result';
@@ -561,6 +565,7 @@ function showResult(result, message) {
     : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Safe Message';
   const mlDlLabel  = modelType === 'ML' ? 'ML Model' : 'DL Model';
   const truncated  = message.length > 80 ? message.slice(0, 80) + '…' : message;
+  const latencyStr = processingTimeMs != null ? `&nbsp;·&nbsp; Latency: <code>${processingTimeMs.toFixed(1)}ms</code>` : '';
 
   resultPanel.style.display = 'block';
   resultPanel.innerHTML = `
@@ -570,7 +575,7 @@ function showResult(result, message) {
         <div class="result-verdict">${typeLabel}</div>
         <div class="result-meta">
           Model: <code>${modelName}</code> (${mlDlLabel}) &nbsp;·&nbsp;
-          Confidence: <code>${confidence.toFixed(2)}%</code>
+          Confidence: <code>${confidence.toFixed(2)}%</code>${latencyStr}
           <br/>
           <span style="margin-top:4px;display:block;font-size:0.78rem;opacity:0.7;">
             "${truncated}"
