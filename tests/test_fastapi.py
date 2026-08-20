@@ -349,3 +349,33 @@ def test_35_metrics_endpoint(client):
     assert "transformer" in data
     assert "accuracy" in data["xgb"]
     assert "f1" in data["xgb"]
+
+def test_36_cors_headers_port_5500(client):
+    for origin in ["http://127.0.0.1:5500", "http://localhost:5500"]:
+        headers = {"Origin": origin}
+
+        # Verify CORS on health endpoint
+        res_health = client.get("/health", headers=headers)
+        assert res_health.status_code == 200
+        assert res_health.headers.get("access-control-allow-origin") == origin
+
+        # Verify CORS on compare endpoint
+        res_compare = client.post(
+            "/compare",
+            json={"text": "Congratulations! You won a free prize."},
+            headers=headers,
+        )
+        assert res_compare.status_code == 200
+        assert res_compare.headers.get("access-control-allow-origin") == origin
+
+        # Verify CORS preflight request
+        res_options = client.options(
+            "/compare",
+            headers={
+                "Origin": origin,
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "content-type",
+            },
+        )
+        assert res_options.status_code == 200
+        assert res_options.headers.get("access-control-allow-origin") == origin
