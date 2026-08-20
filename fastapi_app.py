@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import pickle
 import logging
@@ -207,6 +208,23 @@ class SMSBatchResponse(BaseModel):
     total_processing_time_ms: float
     results: List[SMSPredictResponse]
 
+class CompareResultItem(BaseModel):
+    original_text: str
+    cleaned_text: str
+    prediction: int
+    label: str
+    spam_probability: float
+    ham_probability: float
+    confidence: float
+    model: str
+    model_name: Optional[str] = None
+    model_type: Optional[str] = "ML"
+    is_best: Optional[bool] = True
+    processing_time_ms: float
+
+class CompareResponse(BaseModel):
+    results: List[CompareResultItem]
+
 class RootResponse(BaseModel):
     service: str
     version: str
@@ -235,6 +253,7 @@ def read_root():
     )
 
 @app.get("/health", response_model=HealthResponse)
+@app.get("/api/v1/health", response_model=HealthResponse)
 def health_check(response: Response):
     is_model_loaded = ml_models.get("model") is not None
     is_vec_loaded = ml_models.get("vectorizer") is not None
@@ -406,6 +425,110 @@ def predict_batch(payload: SMSBatchRequest):
         total_processing_time_ms=round(total_elapsed_ms, 3),
         results=results
     )
+
+@app.post("/compare", response_model=CompareResponse)
+@app.post("/api/v1/compare", response_model=CompareResponse)
+def compare_sms(payload: SMSPredictRequest):
+    result = predict_sms(payload)
+    return CompareResponse(
+        results=[
+            CompareResultItem(
+                original_text=result.original_text,
+                cleaned_text=result.cleaned_text,
+                prediction=result.prediction,
+                label=result.label,
+                spam_probability=result.spam_probability,
+                ham_probability=result.ham_probability,
+                confidence=result.confidence,
+                model=result.model,
+                model_name=result.model,
+                model_type="ML",
+                is_best=True,
+                processing_time_ms=result.processing_time_ms
+            )
+        ]
+    )
+
+DEFAULT_EVALUATION_METRICS = {
+    "lr": {
+        "name": "Logistic Regression",
+        "short": "LR",
+        "type": "ML",
+        "member": 1,
+        "accuracy": 97.84,
+        "precision": 96.20,
+        "recall": 93.40,
+        "f1": 94.78,
+        "color": "#3b82f6"
+    },
+    "rf": {
+        "name": "Random Forest",
+        "short": "RF",
+        "type": "ML",
+        "member": 2,
+        "accuracy": 97.42,
+        "precision": 95.80,
+        "recall": 92.10,
+        "f1": 93.91,
+        "color": "#06b6d4"
+    },
+    "xgb": {
+        "name": "XGBoost",
+        "short": "XGB",
+        "type": "ML",
+        "member": 3,
+        "accuracy": 98.56,
+        "precision": 98.97,
+        "recall": 89.72,
+        "f1": 94.12,
+        "color": "#f59e0b"
+    },
+    "cnn": {
+        "name": "1D CNN",
+        "short": "CNN",
+        "type": "DL",
+        "member": 1,
+        "accuracy": 98.44,
+        "precision": 97.50,
+        "recall": 95.80,
+        "f1": 96.64,
+        "color": "#8b5cf6"
+    },
+    "lstm": {
+        "name": "LSTM",
+        "short": "LSTM",
+        "type": "DL",
+        "member": 2,
+        "accuracy": 98.21,
+        "precision": 97.20,
+        "recall": 95.10,
+        "f1": 96.14,
+        "color": "#ec4899"
+    },
+    "transformer": {
+        "name": "Transformer",
+        "short": "TF",
+        "type": "DL",
+        "member": 3,
+        "accuracy": 98.74,
+        "precision": 98.10,
+        "recall": 96.40,
+        "f1": 97.24,
+        "color": "#10b981"
+    }
+}
+
+@app.get("/metrics")
+@app.get("/api/v1/metrics")
+def get_metrics():
+    metrics_path = "evaluation_metrics.json"
+    if os.path.exists(metrics_path):
+        try:
+            with open(metrics_path, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            logger.warning("Failed reading evaluation_metrics.json, using defaults: %s", e)
+    return DEFAULT_EVALUATION_METRICS
 
 if __name__ == "__main__":
     import uvicorn

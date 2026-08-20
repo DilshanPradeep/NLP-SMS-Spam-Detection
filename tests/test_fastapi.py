@@ -46,6 +46,8 @@ def test_4_get_openapi_json(client):
     assert "paths" in schema
     assert "/api/v1/predict" in schema["paths"]
     assert "/api/v1/batch" in schema["paths"]
+    assert "/compare" in schema["paths"]
+    assert "/metrics" in schema["paths"]
 
 def test_5_predict_ham_message(client):
     payload = {"text": "Hey, are you free to meet for coffee this afternoon?"}
@@ -295,3 +297,55 @@ def test_30_monitoring_values_bounded():
     assert summary["successful_requests"] >= 0
     assert summary["failed_requests"] >= 0
     assert summary["average_latency_ms"] >= 0.0
+
+def test_31_compare_endpoint_spam(client):
+    payload = {"text": "WINNER! Claim £1000 cash prize now by calling 0800123456!"}
+    response = client.post("/compare", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "results" in data
+    assert isinstance(data["results"], list)
+    assert len(data["results"]) >= 1
+    r = data["results"][0]
+    assert r["prediction"] == 1
+    assert r["label"] == "SPAM"
+    assert r["spam_probability"] > 0.5
+    assert r["confidence"] >= 90.0
+    assert r["model"] == "XGBoost V2"
+    assert r["is_best"] is True
+    assert "processing_time_ms" in r
+
+def test_32_compare_endpoint_ham(client):
+    payload = {"text": "Hey, are we still meeting for lunch today?"}
+    response = client.post("/compare", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "results" in data
+    assert len(data["results"]) >= 1
+    r = data["results"][0]
+    assert r["prediction"] == 0
+    assert r["label"] == "HAM"
+    assert r["ham_probability"] > 0.5
+
+def test_33_compare_endpoint_validation(client):
+    response = client.post("/compare", json={"text": ""})
+    assert response.status_code == 422
+
+    response_ws = client.post("/compare", json={"text": "    "})
+    assert response_ws.status_code == 422
+
+def test_34_compare_503_when_model_unloaded(client):
+    with patch.dict(fastapi_app.ml_models, {"model": None, "vectorizer": None}, clear=True):
+        response = client.post("/compare", json={"text": "WINNER prize text"})
+        assert response.status_code == 503
+        data = response.json()
+        assert "unavailable" in data["detail"].lower()
+
+def test_35_metrics_endpoint(client):
+    response = client.get("/metrics")
+    assert response.status_code == 200
+    data = response.json()
+    assert "xgb" in data
+    assert "transformer" in data
+    assert "accuracy" in data["xgb"]
+    assert "f1" in data["xgb"]
