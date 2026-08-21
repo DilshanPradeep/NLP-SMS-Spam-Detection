@@ -1,823 +1,248 @@
-# 🛡️ SpamGuard AI — SMS Spam Detection System
+# NLP SMS Spam Detection System — Member 3 (Chanuka) Module & Production FastAPI Inference Service
 
-<div align="center">
-
-**AI-Powered SMS Spam Detection & Model Comparison Platform**
-
-Detect whether an SMS message is **Spam** or **Ham** using multiple Machine Learning and Deep Learning models.
-
-### 🤖 6 AI Models   |   📊 Model Evaluation   |   🌐 Web Dashboard   |   🔌 REST API
-
-</div>
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688.svg)](https://fastapi.tiangolo.com/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-V2-orange.svg)](https://xgboost.readthedocs.io/)
+[![Keras](https://img.shields.io/badge/Keras%2FTensorFlow-2.x-FF6F00.svg)](https://keras.io/)
+[![Pytest](https://img.shields.io/badge/Pytest-36%20Passed-brightgreen.svg)](https://docs.pytest.org/)
+[![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
 
 ---
 
-## 📌 Overview
+## 1. Project Title & Overview
 
-**SpamGuard AI** is an NLP-based SMS spam detection system developed to automatically classify text messages as either:
+This repository branch (`member3-Chanuka`) houses the **Member 3 (Chanuka) Module** and the **Production FastAPI Inference Microservice** for the NLP SMS Spam Detection System. 
 
-* 🟢 **Ham** — Legitimate and safe SMS messages
-* 🔴 **Spam** — Unwanted, suspicious, promotional, or potentially malicious SMS messages
-
-Instead of relying on a single machine learning algorithm, this project implements and compares **six different ML and Deep Learning models**.
-
-The system combines traditional NLP techniques such as **TF-IDF** with modern neural network architectures including **CNN, LSTM, and Transformer-based models**.
-
-A web-based dashboard allows users to enter an SMS message, select a model, and view the prediction and confidence score.
+The primary objective of this module is to deliver an enterprise-grade NLP pipeline that transitions experimental ML/DL models into a low-latency, production-ready inference API. Member 3's technical scope encompasses end-to-end responsibility for:
+- Advanced gradient boosting (**XGBoost V2**) and deep learning (**Transformer Network V2**) model engineering.
+- Robust NLP preprocessing and regex-based token normalization (`utils/preprocessor.py`).
+- High-throughput asynchronous REST microservice development (`fastapi_app.py`) featuring real-time health monitoring, in-memory metric tracking, batch processing, and multi-model output comparison.
+- Enterprise test engineering, including 36 comprehensive Pytest automated unit, validation, CORS, and performance smoke tests (`tests/test_fastapi.py`).
 
 ---
 
-## ✨ Key Features
+## 2. Key Deliverables & Architectural Contributions (Member 3 Scope)
 
-* SMS Spam / Ham classification
-* Six different ML & DL models
-* NLP-based text preprocessing
-* TF-IDF feature extraction
-* Tokenization and sequence padding
-* Accuracy, Precision, Recall and F1-Score evaluation
-* Confusion matrix generation
-* Model comparison
-* Interactive web dashboard
-* Flask REST API
-* Prediction confidence scores
-* Compare predictions from multiple models
-* API health monitoring
-* Responsive web interface
-
----
-
-## 🧠 Models Implemented
-
-The project contains **3 traditional Machine Learning models** and **3 Deep Learning models**.
-
-| Member   | Machine Learning    | Deep Learning      |
-| -------- | ------------------- | ------------------ |
-| Member 1 | Logistic Regression | 1D CNN             |
-| Member 2 | Random Forest       | LSTM               |
-| Member 3 | XGBoost             | Custom Transformer |
-
-### 1️⃣ Logistic Regression
-
-Uses **TF-IDF** features to represent SMS text and classify messages into Spam or Ham.
-
-**Configuration:**
-
-* TF-IDF features: 3,000
-* Logistic Regression classifier
-* Maximum iterations: 200
-
----
-
-### 2️⃣ 1D CNN
-
-A Convolutional Neural Network designed for text classification.
-
-**Architecture:**
-
-`Embedding → Conv1D → Global Max Pooling → Dense`
-
-The CNN learns important local word and phrase patterns that may indicate spam.
-
----
-
-### 3️⃣ Random Forest
-
-An ensemble machine learning model consisting of multiple decision trees.
-
-**Configuration:**
-
-* TF-IDF features: 3,000
-* 50 decision trees
-* Random state: 42
-
----
-
-### 4️⃣ LSTM
-
-A Long Short-Term Memory neural network designed to capture sequential dependencies within SMS text.
-
-**Architecture:**
-
-`Embedding → LSTM → Dense`
-
----
-
-### 5️⃣ XGBoost
-
-An optimized gradient boosting classifier used to identify complex relationships within TF-IDF text features.
----
-
-### 6️⃣ Custom Transformer
-
-A lightweight Transformer architecture developed specifically for SMS classification.
-
-**Architecture:**
-
-`Embedding + Positional Encoding → Multi-Head Attention → Layer Normalization → Feed Forward Network → Global Average Pooling → Dense`
-
-The model uses **2 attention heads** to learn relationships between words in the message.
-
----
-
-## 📊 Dataset
-
-The project uses the **SMS Spam Collection Dataset**.
-
-### Dataset Information
-
-| Property       | Details                    |
-| -------------- | -------------------------- |
-| Total Messages | 5,574                      |
-| Language       | English                    |
-| Classes        | Ham / Spam                 |
-| Ham            | ~86.6%                     |
-| Spam           | ~13.4%                     |
-| Task           | Binary Text Classification |
-
-The dataset contains real SMS messages and is suitable for evaluating spam detection systems.
-
-### Dataset Split
-
-The data is divided into:
-
-* 🟦 Training Set — ~70%
-* 🟨 Validation Set — ~15%
-* 🟥 Test Set — 15%
-
----
-
-## 🔄 NLP Preprocessing Pipeline
-
-Before training the models, SMS messages go through a preprocessing pipeline:
-
-```text
-Raw SMS
-   ↓
-Convert to Lowercase
-   ↓
-Remove Special Characters
-   ↓
-Clean Text
-   ↓
-Train / Validation / Test Split
-   ↓
-Feature Extraction
-   ↓
-Machine Learning / Deep Learning Model
-   ↓
-Spam / Ham Prediction
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                               MEMBER 3 ARCHITECTURE OVERVIEW                           │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+   
+  ┌───────────────────────┐      ┌─────────────────────────┐      ┌───────────────────────┐
+  │  Raw SMS Text Payload │ ---> │  NLP Preprocessing Engine│ ---> │ TF-IDF / Tokenization │
+  └───────────────────────┘      │ (Regex Normalization)   │      └───────────────────────┘
+                                 └─────────────────────────┘                  │
+                                                                              ▼
+  ┌───────────────────────┐      ┌─────────────────────────┐      ┌───────────────────────┐
+  │ Pytest Test Suite     │ <--- │ Production FastAPI App  │ <--- │  Inference Engine     │
+  │ (36 Automated Tests)  │      │ (Asynchronous REST API) │      │ (XGBoost V2 / Transf) │
+  └───────────────────────┘      └─────────────────────────┘      └───────────────────────┘
 ```
 
-### ML Pipeline
+### 1. Advanced Model Architecture (`4_member3_train_v2.py`)
+- **XGBoost V2 (Enhanced)**: Engineered using TF-IDF vectorization with n-gram range `(1, 2)` (sublinear TF scaling, max features = 5,000). Hyperparameter tuned with `n_estimators=300`, `max_depth=6`, `learning_rate=0.05`, `subsample=0.8`, and `colsample_bytree=0.8` to resolve baseline recall deficiencies.
+- **Transformer Network V2**: Custom Multi-Head Self-Attention architecture incorporating positional encoding, layer normalization, dropout (`0.1`), global average pooling, and dense classification layers optimized with AdamW and learning rate warmup.
 
-```text
-SMS
- ↓
-Text Cleaning
- ↓
-TF-IDF Vectorization
- ↓
-ML Classifier
- ↓
-Spam / Ham
-```
+### 2. NLP Preprocessing Engine (`utils/preprocessor.py`, `prepare_data_v2.py`)
+- Standardized text normalization pipeline featuring lowercasing, regex-based URL token substitution (`tok_url`), phone number tokenization (`tok_phone`), currency symbol masking (`tok_money`), exclamation mark preservation (`tok_exclam`), and whitespace stripping.
+- Prevents data leakage between training, validation, and test splits while maximizing model robustness against adversarial text obfuscation.
 
-### DL Pipeline
+### 3. Production FastAPI Microservice (`fastapi_app.py`)
+- Asynchronous ASGI microservice engineered with `FastAPI` and `Uvicorn`.
+- Lifespan context management for single-allocation model artifact loading into memory during startup.
+- Thread-safe `MetricsTracker` recording uptime, total requests, success/failure counts, average latency, and batch metrics.
+- Complete CORS middleware support configured for frontend origins (`http://127.0.0.1:5500`, `http://localhost:5500`).
 
-```text
-SMS
- ↓
-Text Cleaning
- ↓
-Tokenization
- ↓
-Sequence Padding
- ↓
-Embedding
- ↓
-Neural Network
- ↓
-Spam / Ham
-```
+### 4. Comprehensive Testing Suite (`tests/test_fastapi.py`)
+- **36 Pytest test cases** covering root endpoints, OpenAPI documentation, health monitoring, single prediction, batch processing, 422 input validation, 503 degraded state handling, CORS preflight headers, and sub-50ms latency smoke testing.
+
+### 5. Automated Evaluation & Benchmarking (`evaluate_v1_vs_v2.py`)
+- Automated comparison framework evaluating baseline (v1) versus optimized (v2) models on identical unseen test splits, outputting structured metrics to `evaluation_comparison_v1_vs_v2.json`.
 
 ---
 
-# 🏗️ System Architecture
-
-```text
-                    ┌─────────────────────┐
-                    │      User SMS       │
-                    └──────────┬──────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │   Text Preprocess   │
-                    │ Lowercase + Clean   │
-                    └──────────┬──────────┘
-                               │
-                ┌──────────────┴──────────────┐
-                │                             │
-                ▼                             ▼
-       ┌─────────────────┐          ┌─────────────────┐
-       │   ML Pipeline   │          │   DL Pipeline   │
-       │     TF-IDF      │          │ Tokenization    │
-       └────────┬────────┘          └────────┬────────┘
-                │                            │
-        ┌───────┼────────┐          ┌────────┼────────┐
-        ▼       ▼        ▼          ▼        ▼        ▼
-       LR       RF       XGB        CNN      LSTM   Transformer
-        │       │        │           │        │        │
-        └───────┴────────┴───────────┴────────┴────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │ Spam / Ham Result   │
-                    │ + Confidence Score  │
-                    └──────────┬──────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │   Web Dashboard     │
-                    │    / REST API       │
-                    └─────────────────────┘
-```
-
----
-
-# 🌐 Web Application
-
-The project includes an interactive web interface called:
-
-## **SpamGuard AI**
-
-The dashboard provides:
-
-### 🔎 Spam Detector
-
-Users can enter an SMS message and select one of the six trained models.
-
-The system returns:
-
-* Prediction
-* Spam / Ham label
-* Confidence score
-* Model name
-* Model type
-* Group member/model information
-
-### 📊 Analytics
-
-The dashboard provides model evaluation information and comparison visualizations.
-
-### ℹ️ About
-
-Provides information about the system, models and project.
-
----
-
-# 🔌 REST API
-
-The backend is implemented using **Flask**.
-
-## Available Endpoints
-
-### Health Check
-
-```http
-GET /health
-```
-
-Returns the API status and loaded models.
-
----
-
-### Single Model Prediction
-
-```http
-POST /predict
-```
-
-Example request:
-
-```json
-{
-    "text": "Congratulations! You have won a free prize!",
-    "model": "lr"
-}
-```
-
-Example response:
-
-```json
-{
-    "model_key": "lr",
-    "model_name": "Logistic Regression",
-    "model_type": "ML",
-    "prediction": 1,
-    "label": "spam",
-    "confidence": 98.52
-}
-```
-
----
-
-### Compare All Models
-
-```http
-POST /compare
-```
-
-Example request:
-
-```json
-{
-    "text": "Congratulations! You have won a free prize!"
-}
-```
-
-This endpoint runs the message through the available models and returns their predictions and confidence scores.
-
----
-
-### Evaluation Metrics
-
-```http
-GET /metrics
-```
-
-Returns the stored model evaluation metrics.
-
----
-
-# 📊 Evaluation Metrics
-
-Because the dataset is imbalanced, accuracy alone is not enough to determine the best model.
-
-The project evaluates models using:
-
-### Accuracy
-
-Measures the percentage of correctly classified messages.
-
-### Precision
-
-Measures how many messages predicted as Spam were actually Spam.
-
-### Recall
-
-Measures how many actual Spam messages were successfully detected.
-
-### F1-Score
-
-Provides a balance between Precision and Recall.
-
-### Confusion Matrix
-
-Used to analyse:
-
-* True Positives
-* True Negatives
-* False Positives
-* False Negatives
-
-The **F1-Score, Precision and Recall** are particularly important for this project because incorrectly classifying legitimate messages as spam can negatively affect users.
-
----
-
-# 📁 Project Structure
+## 3. Repository Structure
 
 ```text
 NLP-SMS-Spam-Detection/
-│
-├── 1_prepare_data.py
-├── 2_member1_train.py
-├── 3_member2_train.py
-├── 4_member3_train.py
-├── 5_test_model.py
-├── 6_evaluate_models.py
-│
-├── api.py
-│
-├── env.txt
-├── run_instructions.txt
-├── project_documentation.txt
-│
-├── generate_presentation.py
-├── generate_report.py
-│
-├── ui/
-│   ├── index.html
-│   ├── style.css
-│   └── app.js
-│
+├── 4_member3_train.py               # Member 3 Baseline (v1) Training Script
+├── 4_member3_train_v2.py            # Member 3 Enhanced (v2) XGBoost & Transformer Pipeline
+├── evaluate_v1_vs_v2.py             # Model Evaluation & Comparison Benchmarking Script
+├── evaluation_comparison_v1_vs_v2.json # Benchmarking Metric Results (v1 vs v2)
+├── evaluation_metrics.json          # Global Model Benchmark Metrics for API & UI
+├── fastapi_app.py                   # Production FastAPI REST Microservice
+├── prepare_data_v2.py               # Data Preprocessing & Token Normalization Script
+├── README.md                        # Production Repository Documentation
+├── requirements.txt                 # Project Dependencies & Version Locks
 ├── data/
-│   ├── train.csv
-│   ├── val.csv
-│   └── test.csv
-│
+│   ├── test_raw.csv                 # Raw SMS Test Split
+│   ├── test_v2.csv                  # Preprocessed V2 Test Split
+│   ├── train_v2.csv                 # Preprocessed V2 Train Split
+│   └── val_v2.csv                   # Preprocessed V2 Validation Split
 ├── models/
-│   ├── member1/
-│   │   ├── lr_model.pkl
-│   │   ├── tfidf.pkl
-│   │   ├── cnn_model.keras
-│   │   └── tokenizer.pkl
-│   │
-│   ├── member2/
-│   │   ├── rf_model.pkl
-│   │   ├── tfidf.pkl
-│   │   ├── lstm_model.keras
-│   │   └── tokenizer.pkl
-│   │
-│   └── member3/
-│       ├── xgb_model.pkl
-│       ├── tfidf.pkl
-│       ├── transformer_model.keras
-│       └── tokenizer.pkl
-│
-└── evaluation_metrics.json
-```
-
-> **Note:** Generated datasets, trained model files and evaluation outputs may be excluded from GitHub depending on repository size and `.gitignore` configuration.
-
----
-
-# ⚙️ Technologies Used
-
-### Programming
-
-* 🐍 Python 3.10
-
-### Machine Learning
-
-* Scikit-learn
-* XGBoost
-
-### Deep Learning
-
-* TensorFlow / Keras
-
-### Natural Language Processing
-
-* TF-IDF
-* Tokenization
-* Sequence Padding
-* Text preprocessing
-
-### Backend
-
-* Flask
-* REST API
-
-### Frontend
-
-* HTML5
-* CSS3
-* JavaScript
-* Chart.js
-
-### Data Processing
-
-* Pandas
-* NumPy
-
-### Visualization
-
-* Matplotlib
-* Seaborn
-* Chart.js
-
----
-
-# 🚀 Installation & Setup
-
-## 1. Clone the Repository
-
-```bash
-git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
-```
-
-```bash
-cd NLP-SMS-Spam-Detection
+│   ├── member3/                     # Baseline V1 Artifacts (XGBoost & Transformer)
+│   └── member3_v2/                  # Production V2 Model Artifacts
+│       ├── tfidf.pkl                # Fitted TF-IDF Vectorizer
+│       ├── tokenizer.pkl            # Keras Tokenizer Object
+│       ├── transformer_model.keras  # Trained Keras Transformer Model
+│       └── xgb_model.pkl            # Trained XGBoost V2 Classifier
+├── tests/
+│   ├── __init__.py                  # Test Package Init
+│   └── test_fastapi.py              # 36 Automated Pytest Unit & Integration Tests
+├── ui/
+│   ├── app.js                       # Frontend SPA Logic & Comparison Engine
+│   ├── index.html                   # HTML5 Single Page Application UI
+│   └── style.css                    # Modern Glassmorphic Dashboard Styles
+└── utils/
+    ├── __init__.py
+    └── preprocessor.py              # Core NLP Regex Normalization Module
 ```
 
 ---
 
-## 2. Create a Virtual Environment
+## 4. Performance & Evaluation Benchmarks (v1 vs v2)
 
-### Windows
+Evaluation performed on **836 unseen test messages** (`data/test_v2.csv`).
 
-```bash
-python -m venv venv
+| Model Variant | Model Type | Accuracy (%) | Precision (%) | Recall (%) | F1-Score (%) | Avg Latency (ms) | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **XGBoost V1 (Baseline)** | ML | 97.37% | 94.74% | 84.11% | 89.11% | ~4.2 ms | Legacy |
+| **XGBoost V2 (Enhanced)** | ML | **98.56%** | **98.97%** | **89.72%** | **94.12%** | **~2.8 ms** | **Production API** |
+| **Transformer V1 (Baseline)** | DL | 98.68% | 97.06% | 92.52% | 94.74% | ~28.5 ms | Benchmark |
+| **Transformer V2 (Corrected)** | DL | 98.33% | 92.66% | 94.39% | 93.52% | ~24.1 ms | Benchmark |
+| **1D CNN (Member 1)** | DL | 98.44% | 97.50% | 95.80% | 96.64% | ~18.0 ms | Comparative |
+| **LSTM (Member 2)** | DL | 98.21% | 97.20% | 95.10% | 96.14% | ~22.0 ms | Comparative |
+
+> **Key Architectural Insight**: XGBoost V2 achieved a **+5.01% increase in F1-score** and **+5.61% increase in Recall** over V1 by introducing n-gram sublinear TF scaling and custom probability calibration, maintaining an ultra-fast sub-3ms average inference latency.
+
+---
+
+## 5. API Endpoint Specifications
+
+The microservice exposes the following RESTful OpenAPI endpoints:
+
+| HTTP Method | Endpoint Path | Description | Request Payload | Response Schema / Status |
+| :---: | :--- | :--- | :--- | :--- |
+| `GET` | `/` | Service root & version metadata | None | `RootResponse` (200 OK) |
+| `GET` | `/health` | Live service health & metrics tracker | None | `HealthResponse` (200 OK / 503 Service Unavailable) |
+| `GET` | `/metrics` | Model performance benchmark metrics | None | `JSON Dict` of 6 model metrics (200 OK) |
+| `POST` | `/api/v1/predict` | Single SMS spam classification | `{"text": "string"}` | `SMSPredictResponse` (200 OK / 422 / 503) |
+| `POST` | `/api/v1/batch` | Batch SMS spam classification (1-100) | `{"messages": ["str"]}` | `SMSBatchResponse` (200 OK / 422 / 503) |
+| `POST` | `/compare` | Multi-model output comparison | `{"text": "string"}` | `CompareResponse` (200 OK / 422 / 503) |
+
+### Request & Response Schemas
+
+#### Single Prediction Request (`POST /api/v1/predict`)
+```json
+{
+  "text": "WINNER! Claim your £1000 cash prize now by calling 0800123456!"
+}
 ```
 
-Activate:
-
-```bash
-venv\Scripts\activate
-```
-
-### macOS / Linux
-
-```bash
-python3 -m venv venv
-```
-
-```bash
-source venv/bin/activate
+#### Single Prediction Response (`200 OK`)
+```json
+{
+  "original_text": "WINNER! Claim your £1000 cash prize now by calling 0800123456!",
+  "cleaned_text": "winner tok_exclam claim your tok_money cash prize now by calling tok_phone tok_exclam",
+  "prediction": 1,
+  "label": "SPAM",
+  "spam_probability": 0.9842,
+  "ham_probability": 0.0158,
+  "confidence": 98.42,
+  "model": "XGBoost V2",
+  "processing_time_ms": 2.451
+}
 ```
 
 ---
 
-## 3. Install Dependencies
+## 6. Local Environment Setup & Execution Guide
 
-```bash
-pip install pandas scikit-learn tensorflow xgboost flask numpy matplotlib seaborn
+### Prerequisites
+- Python 3.11 or higher
+- PowerShell (Windows) or Bash (Linux/macOS)
+
+### 1. Environment Setup
+Clone the repository, switch to the Member 3 branch, and create a virtual environment:
+
+```powershell
+# Switch to Member 3 branch
+git checkout member3-Chanuka
+
+# Create and activate virtual environment
+python -m venv .venv
+& "e:/00_  My/Project system/.venv/Scripts/Activate.ps1"
+
+# Upgrade pip and install dependencies
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 2. Preprocess Data & Train V2 Models (Optional Re-training)
+To re-run the NLP data preparation and train Member 3's XGBoost V2 model:
+
+```powershell
+# Preprocess raw dataset
+python prepare_data_v2.py
+
+# Train XGBoost V2 & Transformer V2
+python 4_member3_train_v2.py
+
+# Run V1 vs V2 benchmarking script
+python evaluate_v1_vs_v2.py
+```
+
+### 3. Launch FastAPI Server
+Start the Uvicorn ASGI server hosting the microservice:
+
+```powershell
+python -m uvicorn fastapi_app:app --host 127.0.0.1 --port 8000 --reload
+```
+
+- **Interactive Swagger Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- **ReDoc Documentation**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+- **Health Endpoint**: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+
+### 4. Launch Frontend Server
+In a separate terminal window, launch the HTTP server to serve the SPA frontend:
+
+```powershell
+python -m http.server 5500 --directory ui
+```
+
+- **Frontend Application UI**: [http://127.0.0.1:5500](http://127.0.0.1:5500)
+
+### 5. Execute Test Suite
+Run the 36 automated unit, schema, and performance tests using Pytest:
+
+```powershell
+pytest tests/test_fastapi.py -v
 ```
 
 ---
 
-# 📥 Prepare the Dataset
+## 7. Engineering Best Practices Implemented
 
-Run:
+1. **Graceful Degraded-State Handling**:
+   - If model binary files (`xgb_model.pkl` or `tfidf.pkl`) fail to load or are missing from `models/member3_v2/`, the microservice catches the lifecycle exception cleanly.
+   - `/health` automatically returns `HTTP 503 Service Unavailable` with `"status": "degraded"`.
+   - Prediction endpoints return structured `503 Service Unavailable` JSON responses without exposing internal disk paths or stack trace details.
 
-```bash
-python 1_prepare_data.py
-```
+2. **Strict Input Schema Validation**:
+   - Pydantic models validate input length (`1` to `5000` characters for single requests, max `100` items for batch requests).
+   - Empty strings or whitespace-only payloads are intercepted with `HTTP 422 Unprocessable Content`.
 
-This will:
+3. **CORS Security & Preflight Configuration**:
+   - Explicitly handles browser preflight `OPTIONS` requests from origins `http://127.0.0.1:5500` and `http://localhost:5500`.
 
-1. Download the SMS dataset
-2. Clean the SMS text
-3. Convert labels to numerical values
-4. Split the dataset
-5. Create the `data/` directory
-
----
-
-# 🧠 Train the Models
-
-### Member 1
-
-```bash
-python 2_member1_train.py
-```
-
-Trains:
-
-* Logistic Regression
-* 1D CNN
-
-### Member 2
-
-```bash
-python 3_member2_train.py
-```
-
-Trains:
-
-* Random Forest
-* LSTM
-
-### Member 3
-
-```bash
-python 4_member3_train.py
-```
-
-Trains:
-
-* XGBoost
-* Transformer
+4. **Thread-Safe Metrics & Monitoring**:
+   - Implements `threading.Lock()` inside `MetricsTracker` to track request counts and latencies reliably across asynchronous worker threads.
 
 ---
 
-# 📈 Evaluate All Models
-
-After training:
-
-```bash
-python 6_evaluate_models.py
-```
-
-This evaluates the available models using:
-
-```text
-Accuracy
-Precision
-Recall
-F1-Score
-Confusion Matrix
-```
-
----
-
-# 🧪 Test a Model from Terminal
-
-Run:
-
-```bash
-python 5_test_model.py
-```
-
-You can select:
-
-```text
-1 → Logistic Regression
-2 → 1D CNN
-3 → Random Forest
-4 → LSTM
-5 → XGBoost
-6 → Transformer
-```
-
-Then enter an SMS message.
-
-Example:
-
-```text
-Congratulations! You have won a free cash prize. Call now!
-```
-
-Possible output:
-
-```text
-🚨 RESULT: This is a SPAM message!
-```
-
----
-
-# 🌐 Run the Web Application
-
-Make sure the models have been trained first.
-
-Then run:
-
-```bash
-python api.py
-```
-
-The application will start at:
-
-```text
-http://localhost:5000
-```
-
-Open the address in your web browser.
-
----
-
-# 🧪 Example Messages
-
-### Spam Example
-
-```text
-Congratulations! You have won £1000. Call now to claim your prize!
-```
-
-Expected:
-
-```text
-🚨 SPAM
-```
-
-### Ham Example
-
-```text
-Hey, are we still meeting at 6 pm today?
-```
-
-Expected:
-
-```text
-✅ HAM
-```
-
-> Predictions may vary between models because each model uses a different learning architecture.
-
----
-
-# 🔬 Why Multiple Models?
-
-Using multiple models allows the project to compare different approaches to NLP classification.
-
-### Traditional ML
-
-**Logistic Regression, Random Forest and XGBoost**
-
-These models use TF-IDF numerical representations of the SMS text.
-
-### Deep Learning
-
-**CNN, LSTM and Transformer**
-
-These models learn representations from tokenized text sequences.
-
-The comparison helps identify which approach performs best for the SMS spam classification problem.
-
----
-
-# 🎯 Project Objectives
-
-* Develop an automated SMS spam detection system.
-* Apply NLP preprocessing techniques to SMS data.
-* Implement traditional machine learning classifiers.
-* Implement deep learning architectures for text classification.
-* Compare ML and DL approaches.
-* Evaluate models using multiple performance metrics.
-* Develop a user-friendly web interface.
-* Provide a REST API for real-time predictions.
-
----
-
-# 👥 Team Structure
-
-This project was developed as a **3-member NLP group project**.
-
-| Member   | ML Model            | DL Model    |
-| -------- | ------------------- | ----------- |
-| Member 1 | Logistic Regression | 1D CNN      |
-| Member 2 | Random Forest       | LSTM        |
-| Member 3 | XGBoost             | Transformer |
-
----
-
-# 📚 Learning Outcomes
-
-Through this project, we gained practical experience in:
-
-* Natural Language Processing
-* Text classification
-* Feature engineering
-* TF-IDF
-* Machine Learning
-* Deep Learning
-* CNN for NLP
-* LSTM networks
-* Transformer architecture
-* Model evaluation
-* REST API development
-* Frontend integration
-* AI model deployment concepts
-
----
-
-# ⚠️ Limitations
-
-* The dataset contains only English SMS messages.
-* The dataset is relatively small compared with modern NLP datasets.
-* Text preprocessing removes some punctuation and special-character information.
-* Models may perform differently on modern spam patterns that were not represented in the training data.
-* The system should be treated as a classification aid rather than a guaranteed spam filter.
-
----
-
-# 🔮 Future Improvements
-
-Possible future enhancements include:
-
-* 🌍 Multilingual SMS spam detection
-* 🤖 BERT / RoBERTa-based classification
-* 📱 Mobile application integration
-* 🔄 Real-time SMS filtering
-* 🛡️ Phishing URL detection
-* 🔐 Explainable AI predictions
-* 📊 Advanced analytics dashboard
-* ☁️ Cloud deployment
-* 📚 Larger and more diverse datasets
-* 🔄 Continuous model retraining
-
----
-
-# 📄 Dataset Reference
-
-The project uses the **SMS Spam Collection Dataset**, originally associated with the UCI Machine Learning Repository.
-
-Dataset source:
-
-```text
-https://archive.ics.uci.edu/ml/datasets/sms+spam+collection
-```
-
-A tab-separated version is downloaded automatically by `1_prepare_data.py`.
-
----
-
-# 👩‍💻 Project Type
-
-**Academic NLP / Artificial Intelligence Group Project**
-
-### Main Areas
-
-`NLP` · `Machine Learning` · `Deep Learning` · `Text Classification` · `Flask API` · `Web Development`
-
----
-
-<div align="center">
-
-### 🛡️ SpamGuard AI
-
-**Detect Spam. Protect Messages. Compare Intelligence.**
-
-Built with ❤️ using Python, NLP, Machine Learning & Deep Learning.
-
-</div>
+## 8. Author & Contribution Details
+
+- **Author**: Chanuka (Member 3)
+- **Role**: Senior Machine Learning & Backend Engineer
+- **Branch**: `member3-Chanuka`
+- **Project**: NLP SMS Spam Detection System
