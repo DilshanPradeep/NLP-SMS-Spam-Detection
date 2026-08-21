@@ -1,5 +1,4 @@
-# NLP SMS Spam Detection System — Member 3 (Chanuka) Module & Production FastAPI Inference Service
-
+# NLP SMS Spam Detection System — Member3 Models
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688.svg)](https://fastapi.tiangolo.com/)
 [![XGBoost](https://img.shields.io/badge/XGBoost-V2-orange.svg)](https://xgboost.readthedocs.io/)
@@ -11,7 +10,7 @@
 
 ## 1. Project Title & Overview
 
-This repository branch (`member3-Chanuka`) houses the **Member 3 (Chanuka) Module** and the **Production FastAPI Inference Microservice** for the NLP SMS Spam Detection System. 
+This repository branch (`member3-Chanuka`) houses the **Member 3 Models** and the **Production FastAPI Inference Microservice** for the NLP SMS Spam Detection System. 
 
 The primary objective of this module is to deliver an enterprise-grade NLP pipeline that transitions experimental ML/DL models into a low-latency, production-ready inference API. Member 3's technical scope encompasses end-to-end responsibility for:
 - Advanced gradient boosting (**XGBoost V2**) and deep learning (**Transformer Network V2**) model engineering.
@@ -242,7 +241,7 @@ pytest tests/test_fastapi.py -v
 
 ## 8. Author & Contribution Details
 
-- **Author**: Chanuka (Member 3)
-- **Role**: Senior Machine Learning & Backend Engineer
+- **Author**: Chanuka Sandun
+- **Role**: Cyber security Undergraduate 
 - **Branch**: `member3-Chanuka`
 - **Project**: NLP SMS Spam Detection System
